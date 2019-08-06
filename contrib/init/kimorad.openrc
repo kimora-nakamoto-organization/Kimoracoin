@@ -1,0 +1,92 @@
+#!/sbin/runscript
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/kimora/.kimora" ]; then
+	KMRD_DEFAULT_DATADIR="/var/lib/kimora/.kimora"
+else
+	KMRD_DEFAULT_DATADIR="/var/lib/kimorad"
+fi
+
+KMRD_CONFIGFILE=${KMRD_CONFIGFILE:-/etc/kimora/kimora.conf}
+KMRD_PIDDIR=${KMRD_PIDDIR:-/var/run/kimorad}
+KMRD_PIDFILE=${KMRD_PIDFILE:-${KMRD_PIDDIR}/kimorad.pid}
+KMRD_DATADIR=${KMRD_DATADIR:-${KMRD_DEFAULT_DATADIR}}
+KMRD_USER=${KMRD_USER:-${KMR_USER:-kimora}}
+KMRD_GROUP=${KMRD_GROUP:-kimora}
+KMRD_BIN=${KMRD_BIN:-/usr/bin/kimorad}
+KMRD_NICE=${KMRD_NICE:-${NICELEVEL:-0}}
+KMRD_OPTS="${KMRD_OPTS:-${KMR_OPTS}}"
+
+name="Kimora Core Daemon"
+description="Kimora cryptocurrency P2P network daemon"
+
+command="/usr/bin/kimorad"
+command_args="-pid=\"${KMRD_PIDFILE}\" \
+		-conf=\"${KMRD_CONFIGFILE}\" \
+		-datadir=\"${KMRD_DATADIR}\" \
+		-daemon \
+		${KMRD_OPTS}"
+
+required_files="${KMRD_CONFIGFILE}"
+start_stop_daemon_args="-u ${KMRD_USER} \
+			-N ${KMRD_NICE} -w 2000"
+pidfile="${KMRD_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${KMRD_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${KMRD_USER}:${KMRD_GROUP}" \
+	"${KMRD_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${KMRD_USER}:${KMRD_GROUP}" \
+	"${KMRD_PIDDIR}"
+
+	checkpath -f \
+	-o ${KMRD_USER}:${KMRD_GROUP} \
+	-m 0660 \
+	${KMRD_CONFIGFILE}
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if ! grep -qs '^rpcpassword=' "${KMRD_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run kimorad."
+		eerror "The setting must appear in ${KMRD_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following "
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Kimora Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

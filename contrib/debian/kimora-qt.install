@@ -1,0 +1,6 @@
+usr/local/bin/kimora-qt usr/bin
+share/pixmaps/kimora32.xpm usr/share/pixmaps
+share/pixmaps/kimora16.xpm usr/share/pixmaps
+share/pixmaps/kimora128.png usr/share/pixmaps
+debian/kimora-qt.desktop usr/share/applications
+debian/kimora-qt.protocol usr/share/kde4/services/

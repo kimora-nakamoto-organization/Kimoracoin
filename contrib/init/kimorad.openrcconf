@@ -1,0 +1,33 @@
+# /etc/conf.d/kimorad: config file for /etc/init.d/kimorad
+
+# Config file location
+#KMRD_CONFIGFILE="/etc/kimora/kimora.conf"
+
+# What directory to write pidfile to?  (created and owned by $KMRD_USER)
+#KMRD_PIDDIR="/var/run/kimorad"
+
+# What filename to give the pidfile
+#KMRD_PIDFILE="${KMRD_PIDDIR}/kimorad.pid"
+
+# Where to write kimorad data (be mindful that the blockchain is large)
+#KMRD_DATADIR="/var/lib/kimorad"
+
+# User and group to own kimorad process
+#KMRD_USER="kimora"
+#KMRD_GROUP="kimora"
+
+# Path to kimorad executable
+#KMRD_BIN="/usr/bin/kimorad"
+
+# Nice value to run kimorad under
+#KMRD_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#KMRD_OPTS=""
+
+# The timeout in seconds OpenRC will wait for kimorad to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+KMRD_SIGTERM_TIMEOUT=60

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Kimora Core
+Comment=Connect to the Kimora P2P Network
+Comment[de]=Verbinde mit dem Kimora peer-to-peer Netzwerk
+Comment[fr]=Kimora, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Kimora, eşten eşe kriptografik sanal para birimi
+Exec=kimora-qt %u
+Terminal=false
+Type=Application
+Icon=kimora128
+MimeType=x-scheme-handler/kimora;
+Categories=Office;Finance;

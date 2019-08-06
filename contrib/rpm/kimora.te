@@ -1,0 +1,81 @@
+policy_module(kimora, 1.100.1)
+
+########################################
+#
+# Declarations
+#
+
+type kimora_t;
+type kimora_exec_t;
+init_daemon_domain(kimora_t, kimora_exec_t)
+
+permissive kimora_t;
+
+type kimora_initrc_exec_t;
+init_script_file(kimora_initrc_exec_t)
+
+type kimora_conf_t;
+files_type(kimora_conf_t)
+
+type kimora_var_lib_t;
+files_type(kimora_var_lib_t)
+
+type kimora_var_run_t;
+files_type(kimora_var_run_t)
+
+type kimora_port_t;
+corenet_port(kimora_port_t)
+
+########################################
+#
+# kimora local policy
+#
+allow kimora_t self:process { fork };
+
+allow kimora_t self:fifo_file rw_fifo_file_perms;
+allow kimora_t self:unix_stream_socket create_stream_socket_perms;
+
+manage_dirs_pattern(kimora_t, kimora_conf_t, kimora_conf_t)
+manage_files_pattern(kimora_t, kimora_conf_t, kimora_conf_t)
+
+manage_dirs_pattern(kimora_t, kimora_var_lib_t, kimora_var_lib_t)
+manage_files_pattern(kimora_t, kimora_var_lib_t, kimora_var_lib_t)
+files_var_lib_filetrans(kimora_t, kimora_var_lib_t, { dir file })
+
+manage_dirs_pattern(kimora_t, kimora_var_run_t, kimora_var_run_t)
+manage_files_pattern(kimora_t, kimora_var_run_t, kimora_var_run_t)
+
+sysnet_dns_name_resolve(kimora_t)
+corenet_all_recvfrom_unlabeled(kimora_t)
+
+allow kimora_t self:tcp_socket create_stream_socket_perms;
+corenet_tcp_sendrecv_generic_if(kimora_t)
+corenet_tcp_sendrecv_generic_node(kimora_t)
+corenet_tcp_sendrecv_all_ports(kimora_t)
+corenet_tcp_bind_generic_node(kimora_t)
+
+gen_require(`
+    type kimora_port_t;
+')
+allow kimora_t kimora_port_t:tcp_socket name_bind;
+
+gen_require(`
+    type kimora_port_t;
+')
+allow kimora_t kimora_port_t:tcp_socket name_connect;
+
+domain_use_interactive_fds(kimora_t)
+
+files_read_etc_files(kimora_t)
+
+miscfiles_read_localization(kimora_t)
+
+sysnet_dns_name_resolve(kimora_t)
+
+allow kimora_t kimora_exec_t:file execute_no_trans;
+allow kimora_t self:process setsched;
+corecmd_exec_ls(kimora_t)
+corenet_tcp_connect_http_port(kimora_t)
+dev_read_urand(kimora_t)
+fs_getattr_xattr_fs(kimora_t)
+kernel_read_system_state(kimora_t)
